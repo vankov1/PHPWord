@@ -71,16 +71,32 @@ class Html
             $html = '<body>' . $html . '</body>';
         }
 
-        // Load DOM
-        $orignalLibEntityLoader = libxml_disable_entity_loader(true);
-        $dom = new \DOMDocument();
-        $dom->preserveWhiteSpace = $preserveWhiteSpace;
-        $dom->loadXML($html);
-        self::$xpath = new \DOMXPath($dom);
-        $node = $dom->getElementsByTagName('body');
+	    //need to remove whitespaces between tags, as loadHTML seems to take those into account
+	    $html = preg_replace('/(\>)\s*(\<)/m', '$1$2', $html);
 
-        self::parseNode($node->item(0), $element);
+	    // Load DOM
+	    $orignalLibEntityLoader = libxml_disable_entity_loader(true);
+	    $dom = new \DOMDocument();
+	    $dom->preserveWhiteSpace = $preserveWhiteSpace;
+//        $dom->loadXML($html);
+	    $html = mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8');
+	    $dom->loadHTML($html, LIBXML_NOWARNING);
+	    self::$xpath = new \DOMXPath($dom);
+	    $node = $dom->getElementsByTagName('body');
+
+	    self::parseNode($node->item(0), $element);
         libxml_disable_entity_loader($orignalLibEntityLoader);
+
+        // Load DOM
+//        $orignalLibEntityLoader = libxml_disable_entity_loader(true);
+//        $dom = new \DOMDocument();
+//        $dom->preserveWhiteSpace = $preserveWhiteSpace;
+//        $dom->loadXML($html);
+//        self::$xpath = new \DOMXPath($dom);
+//        $node = $dom->getElementsByTagName('body');
+//
+//        self::parseNode($node->item(0), $element);
+//        libxml_disable_entity_loader($orignalLibEntityLoader);
     }
 
     /**
